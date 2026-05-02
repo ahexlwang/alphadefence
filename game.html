@@ -513,6 +513,7 @@
     nakseongBuffTimer:0,
     stageHpMul:1,
     stagePhoneEvents:{},
+    finalStageEvent:false,
     rpsDone:false,
     messageOnClose:null,
     choosingAugment:false,
@@ -1546,6 +1547,7 @@
   }
 
   function useSikHelp(){
+    if(state.stage >= 100){ toast('100라운드에서는 사용할 수 없습니다'); sfx('error'); return; }
     if(state.sikHelpUses >= 2){ toast('식 도와줘는 2번까지!'); sfx('error'); return; }
     if(!state.mobs.length){ toast('몬스터가 없습니다'); sfx('error'); return; }
     state.sikHelpUses++;
@@ -1562,6 +1564,7 @@
   }
 
   function useNakseongTalk(){
+    if(state.stage >= 100){ toast('100라운드에서는 사용할 수 없습니다'); sfx('error'); return; }
     if(state.naksUses >= 2){ toast('진대하기는 2번까지!'); sfx('error'); return; }
     state.naksUses++;
     updateNaksButton();
@@ -1584,25 +1587,34 @@
 
   function triggerStageEvents(){
     state.stageHpMul = 1;
-    const afterPhone = state.stage === 50 && !state.rpsDone ? showRpsModal : null;
-    if(state.stage < 40){
-      if(afterPhone) afterPhone();
+    if(state.stage === 100){
+      if(!state.finalStageEvent){
+        state.finalStageEvent = true;
+        state.units = state.units.filter(u=>u.race!=='신화');
+        state.dragging = null;
+        $('menu').innerHTML = '';
+        _powerVer++;
+        showMessageModal('새벽 3시. 식을 잡을 마지막 기회입니다.', '황제가 사라졌습니다.');
+      }
+      _uiNext = 0;
+      updateUI();
       return;
     }
-    if(state.stagePhoneEvents[state.stage]){
-      if(afterPhone) afterPhone();
+    if(state.stage === 50){
+      if(!state.rpsDone) showRpsModal();
       return;
     }
+    if(state.stage !== 40 || state.stagePhoneEvents[state.stage]) return;
     state.stagePhoneEvents[state.stage] = true;
     if(Math.random() < .70){
       state.stageHpMul = 4;
-      showMessageModal('식이 gf한테 전화를 받았습니다.', '이번 라운드 몬스터 체력이 4배가 됩니다.', afterPhone);
+      showMessageModal('식이 gf한테 전화를 받았습니다.', '이번 라운드 몬스터 체력이 4배가 됩니다.');
     }else{
       state.stageHpMul = 2;
       const epic = pickEpicUnit();
       addUnit(epic,'에픽');
       burst('에픽',epic);
-      showMessageModal('오늘은 식의 전화기가 조용합니다', `이번 라운드 몬스터 체력이 2배가 됩니다.\n${epic} 획득!`, afterPhone);
+      showMessageModal('오늘은 식의 전화기가 조용합니다', `이번 라운드 몬스터 체력이 2배가 됩니다.\n${epic} 획득!`);
     }
   }
 
@@ -2091,14 +2103,14 @@
     if(!btn) return;
     const left=Math.max(0, 2 - state.sikHelpUses);
     btn.textContent=`식 도와줘 ${left}/2`;
-    btn.disabled = left <= 0;
+    btn.disabled = left <= 0 || state.stage >= 100;
   }
   function updateNaksButton(){
     const btn=$('naksBtn');
     if(!btn) return;
     const left=Math.max(0, 2 - state.naksUses);
     btn.innerHTML=`낙성대 우동에서<br>진대하기 ${left}/2`;
-    btn.disabled = left <= 0;
+    btn.disabled = left <= 0 || state.stage >= 100;
   }
 
   function drawBg(){
