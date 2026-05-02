@@ -225,6 +225,19 @@
   }
 
   .hidden{display:none!important}
+
+  /* ── Ranking ── */
+  #rankModal{position:absolute;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(0,0,0,.78)}
+  .rankPanel{background:linear-gradient(180deg,#1a2035,#0d1020);border-radius:22px;padding:22px 16px 18px;width:100%;max-width:400px;max-height:80vh;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+  .rankList{overflow-y:auto;display:flex;flex-direction:column;gap:5px;max-height:calc(80vh - 230px)}
+  .rankItem{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.07);border-radius:10px;font-size:14px}
+  .rankNum{width:22px;text-align:center;font-weight:900;color:#ffb42d;flex-shrink:0}
+  .rankName{flex:1;color:#fff;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rankScore{color:#aef;font-size:13px;flex-shrink:0}
+  .rankMsg{text-align:center;color:#888;padding:20px 0;font-size:14px}
+  #rankNameInput{width:100%;box-sizing:border-box;padding:10px 14px;border-radius:12px;border:1.5px solid #444;background:#131a28;color:#fff;font-size:15px;margin-bottom:8px;outline:none}
+  #rankNameInput:focus{border-color:#ffb42d}
+  .titleRankBtn{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:38px;z-index:10;background:rgba(255,180,40,.18);border:1.5px solid rgba(255,180,40,.45);color:#ffd87a;font-size:13px;font-weight:900;padding:6px 13px;border-radius:20px}
 </style>
 </head>
 <body>
@@ -415,6 +428,7 @@
       </svg>
       <div class="titleOverlay" style="background:linear-gradient(180deg,rgba(0,0,0,.28) 0%,rgba(0,0,0,.06) 38%,rgba(0,0,0,.06) 58%,rgba(0,0,0,.34) 100%)"></div>
       <div class="versionBadge" id="titleVersion">v0.20</div>
+      <button class="titleRankBtn" id="titleRankBtn">🏆 랭킹</button>
       <div class="titleNameBlock">
         <div class="titleMainName">알파 디펜스</div>
         <div class="titleSubName">분노의 식잡이</div>
@@ -437,6 +451,7 @@
     <div class="modal">
       <div class="title" id="gameOverTitle">게임오버</div>
       <div class="titleSub" id="gameOverText"></div>
+      <button class="statsBtn" id="gameOverRankBtn" style="width:100%;margin-bottom:10px">🏆 랭킹 등록</button>
       <button class="startBtn" id="restartGameBtn">처음부터 다시하기</button>
     </div>
   </div>
@@ -457,14 +472,46 @@
         <div class="statsSub">100스테이지 클리어 통계</div>
       </div>
       <div id="clearStatsBody"></div>
-      <div class="statsBtnRow">
+      <div class="statsBtnRow" style="grid-template-columns:1fr 1fr 1fr">
         <button class="statsBtn dark" id="statsCloseBtn">닫기</button>
+        <button class="statsBtn" id="statsRankBtn">🏆 랭킹</button>
         <button class="statsBtn" id="statsRetryBtn">다시하기</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="rankModal">
+    <div class="rankPanel">
+      <div class="statsHead">
+        <div class="statsTitle">명예의 전당</div>
+        <div class="statsSub">클리어 WAVE 기준 · 킬 수 동점 처리</div>
+      </div>
+      <div id="rankListBody"><div class="rankMsg">불러오는 중...</div></div>
+      <div id="rankSubmitArea" style="display:none">
+        <input id="rankNameInput" type="text" maxlength="12" placeholder="닉네임 (최대 12자)" autocomplete="off">
+        <button class="statsBtn" id="rankSubmitBtn" style="width:100%">등록</button>
+      </div>
+      <div class="statsBtnRow">
+        <button class="statsBtn dark" id="rankCloseBtn">닫기</button>
+        <button class="statsBtn" id="rankRegisterBtn">내 기록 등록</button>
       </div>
     </div>
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  const _fbCfg = {
+    apiKey:            "AIzaSyCacYgTysTvUI4FdD6HZE5nWuAdQm32nBQ",
+    authDomain:        "alphadefence-5e249.firebaseapp.com",
+    projectId:         "alphadefence-5e249",
+    storageBucket:     "alphadefence-5e249.firebasestorage.app",
+    messagingSenderId: "179828963969",
+    appId:             "1:179828963969:web:4867bcc71a73b886fbab80",
+  };
+  try { firebase.initializeApp(_fbCfg); } catch(e){}
+</script>
 <script>
 (()=>{
   const cv = document.getElementById('cv');
@@ -514,6 +561,8 @@
     stageHpMul:1,
     stagePhoneEvents:{},
     finalStageEvent:false,
+    finalRpsTimer:30,
+    finalRpsPending:false,
     rpsDone:false,
     messageOnClose:null,
     choosingAugment:false,
@@ -949,6 +998,8 @@
       armor += armorAdd;
       speed *= (1 + Math.min(0.11, (stage-30) * 0.0016));
     }
+    if(stage >= 70) hp = Math.ceil(hp * Math.pow(1.1, stage-70));
+    if(stage === 100) hp = Math.ceil(hp * 10);
     if(boss){
       const bossLv = Math.max(1, Math.floor(stage/10));
       armor = Math.max(0, Math.floor((bossLv-1)*1.75));
@@ -1593,6 +1644,8 @@
     if(state.stage === 100){
       if(!state.finalStageEvent){
         state.finalStageEvent = true;
+        state.finalRpsTimer = 30;
+        state.finalRpsPending = false;
         state.units = state.units.filter(u=>u.race!=='신화');
         state.dragging = null;
         $('menu').innerHTML = '';
@@ -1661,6 +1714,54 @@
     }
   }
 
+  function showFinalRpsModal(){
+    if(state.finalRpsPending || state.stage !== 100 || state.over) return;
+    state.finalRpsPending = true;
+    state.messageOnClose = null;
+    $('messageCloseBtn').style.display = 'none';
+    $('messageTitle').textContent = '식과 최후의 가위바위보';
+    $('messageText').textContent = '지면 랜덤 유닛 3개 삭제, 이기면 제한시간 +30초.';
+    const actions=$('messageActions');
+    actions.innerHTML = ['가위','바위','보'].map(v=>`<button data-final-rps="${v}">${v}</button>`).join('');
+    actions.classList.add('show');
+    $('messageModal').style.display = 'flex';
+  }
+
+  function removeRandomUnits(count){
+    for(let i=0;i<count && state.units.length;i++){
+      const idx=Math.floor(Math.random()*state.units.length);
+      state.units.splice(idx,1);
+    }
+    state.dragging = null;
+    $('menu').innerHTML = '';
+    _powerVer++;
+  }
+
+  function resolveFinalRps(player){
+    if(!state.finalRpsPending) return;
+    const choices=['가위','바위','보'];
+    const sik=choices[Math.floor(Math.random()*choices.length)];
+    const win = (player==='가위'&&sik==='보') || (player==='바위'&&sik==='가위') || (player==='보'&&sik==='바위');
+    const lose = (sik==='가위'&&player==='보') || (sik==='바위'&&player==='가위') || (sik==='보'&&player==='바위');
+    state.finalRpsTimer = 30;
+    $('messageActions').classList.remove('show');
+    $('messageActions').innerHTML = '';
+    if(win){
+      state.time += 30;
+      sfx('legend');
+      showMessageModal('가위바위보 승리!', `나: ${player} / 식: ${sik}\n제한시간 +30초`, ()=>{ state.finalRpsPending=false; });
+    }else if(lose){
+      removeRandomUnits(3);
+      sfx('error');
+      showMessageModal('가위바위보 패배!', `나: ${player} / 식: ${sik}\n랜덤 유닛 3개 삭제`, ()=>{ state.finalRpsPending=false; });
+      _uiNext = 0;
+      updateUI();
+    }else{
+      sfx('menu');
+      showMessageModal('가위바위보 무승부', `나: ${player} / 식: ${sik}\n아무 일도 일어나지 않았습니다.`, ()=>{ state.finalRpsPending=false; });
+    }
+  }
+
   function nextStage(){
     if(state.stage >= 100){ endGame(true,'최종보스 김박황연합까지 격파했다. 황제 세계 정복 성공.'); return; }
     const clearedStage = state.stage;
@@ -1679,8 +1780,16 @@
   }
 
   function update(dt){
-    if(!state.running || state.over || state.choosingAugment) return;
+    if(!state.running || state.over || state.choosingAugment || state.finalRpsPending) return;
     state.time -= dt;
+    if(state.stage === 100 && state.finalStageEvent){
+      state.finalRpsTimer -= dt;
+      if(state.finalRpsTimer <= 0){
+        state.finalRpsTimer = 30;
+        showFinalRpsModal();
+        return;
+      }
+    }
 
     const isBoss=!!bosses[state.stage];
     const spawnCount=isBoss?1:balance.spawnCount;
@@ -2650,7 +2759,9 @@
   };
   $('messageActions').onclick = e=>{
     const choice=e.target.closest('[data-rps]')?.dataset.rps;
-    if(choice) resolveRps(choice);
+    const finalChoice=e.target.closest('[data-final-rps]')?.dataset.finalRps;
+    if(finalChoice) resolveFinalRps(finalChoice);
+    else if(choice) resolveRps(choice);
   };
   $('restartGameBtn').onclick = ()=>location.reload();
   $('statsRetryBtn').onclick = ()=>location.reload();
@@ -2800,6 +2911,79 @@ $('startBtn').onclick = ()=>{
     requestAnimationFrame(loop);
   }
   render(); setLowMode(false); updateUI();
+
+  // ===== RANKING =====
+  const _RANK_COLL = 'alphadefence_ranks';
+  let _db = null;
+  let _rankPending = null;
+
+  function _initDb(){
+    if(_db) return true;
+    try{ if(typeof firebase!=='undefined'&&firebase.apps.length){ _db=firebase.firestore(); return true; } }catch(e){}
+    return false;
+  }
+
+  async function _submitRank(name,stage,kills){
+    if(!_initDb()) return false;
+    try{ await _db.collection(_RANK_COLL).add({name:name.trim().slice(0,12)||'익명',stage,kills,ts:Date.now()}); return true; }catch(e){ return false; }
+  }
+
+  async function _loadRanks(){
+    if(!_initDb()) return null;
+    try{
+      let snap;
+      try{
+        snap = await _db.collection(_RANK_COLL).orderBy('stage','desc').orderBy('kills','desc').limit(20).get();
+      }catch(e){
+        snap = await _db.collection(_RANK_COLL).limit(200).get();
+        const docs=snap.docs.map(d=>({id:d.id,...d.data()}));
+        docs.sort((a,b)=>b.stage-a.stage||b.kills-a.kills);
+        return docs.slice(0,20);
+      }
+      return snap.docs.map(d=>({id:d.id,...d.data()}));
+    }catch(e){ return null; }
+  }
+
+  function _escH(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  async function _refreshRankList(){
+    const body=$('rankListBody');
+    body.innerHTML='<div class="rankMsg">랭킹 불러오는 중...</div>';
+    const rows=await _loadRanks();
+    if(!rows){ body.innerHTML='<div class="rankMsg">랭킹을 불러오지 못했습니다.<br>Firebase 설정을 확인해주세요.</div>'; return; }
+    if(!rows.length){ body.innerHTML='<div class="rankMsg">아직 등록된 랭킹이 없습니다.</div>'; return; }
+    body.innerHTML='<div class="rankList">'+rows.map((r,i)=>`<div class="rankItem"><span class="rankNum">${i+1}</span><span class="rankName">${_escH(r.name||'익명')}</span><span class="rankScore">WAVE ${r.stage} · 킬 ${fmtNum(r.kills||0)}</span></div>`).join('')+'</div>';
+  }
+
+  function _showRankModal(pending){
+    _rankPending=pending||null;
+    $('rankModal').style.display='flex';
+    $('rankSubmitArea').style.display='none';
+    $('rankRegisterBtn').style.display=_rankPending?'':'none';
+    _refreshRankList();
+  }
+
+  $('rankCloseBtn').onclick=()=>{ $('rankModal').style.display='none'; _rankPending=null; };
+  $('rankRegisterBtn').onclick=()=>{
+    $('rankSubmitArea').style.display='';
+    $('rankRegisterBtn').style.display='none';
+    $('rankNameInput').value=localStorage.getItem('alphaRankName')||'';
+    $('rankNameInput').focus();
+  };
+  $('rankSubmitBtn').onclick=async()=>{
+    if(!_rankPending) return;
+    const name=($('rankNameInput').value||'').trim().slice(0,12)||'익명';
+    localStorage.setItem('alphaRankName',name);
+    $('rankSubmitBtn').disabled=true; $('rankSubmitBtn').textContent='등록 중...';
+    const ok=await _submitRank(name,_rankPending.stage,_rankPending.kills);
+    $('rankSubmitBtn').disabled=false; $('rankSubmitBtn').textContent='등록';
+    if(ok){ _rankPending=null; $('rankSubmitArea').style.display='none'; toast('랭킹 등록 완료!'); _refreshRankList(); }
+    else toast('등록 실패. Firebase 설정을 확인해주세요.');
+  };
+  $('titleRankBtn').onclick=(e)=>{ e.stopPropagation(); _showRankModal(null); };
+  $('gameOverRankBtn').onclick=()=>_showRankModal({stage:state.stage,kills:state.kills});
+  $('statsRankBtn').onclick=()=>_showRankModal({stage:state.stage,kills:state.kills});
+
 })();
 </script>
 </body>
