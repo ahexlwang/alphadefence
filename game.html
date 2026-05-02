@@ -152,6 +152,10 @@
   #messageModal{z-index:70;pointer-events:auto}
   .messageClose{position:absolute;right:14px;top:12px;width:42px;height:42px;border:0;border-radius:14px;background:linear-gradient(180deg,#ff6b6b,#b52533);border-bottom:6px solid #6b0f19;color:white;font-size:24px;font-weight:1000;line-height:1;box-shadow:0 8px 18px rgba(0,0,0,.28)}
   .messageClose:active{transform:translateY(2px);border-bottom-width:4px}
+  .messageActions{display:none;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+  .messageActions.show{display:grid}
+  .messageActions button{min-height:58px;border:0;border-radius:16px;background:linear-gradient(180deg,#ffe977,#ffb42d);border-bottom:7px solid #8f5714;color:#251500;font-size:18px;font-weight:1000;box-shadow:0 8px 18px rgba(0,0,0,.28)}
+  .messageActions button:active{transform:translateY(2px);border-bottom-width:4px}
   #clearStats{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:42;padding:14px;background:rgba(5,8,10,.72);backdrop-filter:blur(5px)}
   .statsPanel{width:min(96%,520px);max-height:94%;overflow:auto;border-radius:28px;background:linear-gradient(180deg,#222b36,#10151d);border:3px solid rgba(255,255,255,.12);border-bottom:9px solid #05070a;box-shadow:0 22px 60px rgba(0,0,0,.62);padding:16px;color:#f6f4e8}
   .statsHead{text-align:center;margin-bottom:10px}
@@ -442,6 +446,7 @@
       <button class="messageClose" id="messageCloseBtn">×</button>
       <div class="title" id="messageTitle">알림</div>
       <div class="titleSub" id="messageText"></div>
+      <div class="messageActions" id="messageActions"></div>
     </div>
   </div>
 
@@ -506,6 +511,10 @@
     sikFlood:null,
     naksUses:0,
     nakseongBuffTimer:0,
+    stageHpMul:1,
+    stagePhoneEvents:{},
+    rpsDone:false,
+    messageOnClose:null,
     choosingAugment:false,
     augmentChoices:[],
     augPickCounts:{},
@@ -944,6 +953,7 @@
       if(stage > 30) armor += Math.floor((stage-30)/24);
       speed *= .50;
     }
+    if(stage === state.stage) hp = Math.ceil(hp * (state.stageHpMul || 1));
     return {hp,maxHp:hp,armor,speed,type,boss};
   }
 
@@ -1572,11 +1582,76 @@
     }
   }
 
+  function triggerStageEvents(){
+    state.stageHpMul = 1;
+    const afterPhone = state.stage === 50 && !state.rpsDone ? showRpsModal : null;
+    if(state.stage < 40){
+      if(afterPhone) afterPhone();
+      return;
+    }
+    if(state.stagePhoneEvents[state.stage]){
+      if(afterPhone) afterPhone();
+      return;
+    }
+    state.stagePhoneEvents[state.stage] = true;
+    if(Math.random() < .70){
+      state.stageHpMul = 4;
+      showMessageModal('식이 gf한테 전화를 받았습니다.', '이번 라운드 몬스터 체력이 4배가 됩니다.', afterPhone);
+    }else{
+      state.stageHpMul = 2;
+      const epic = pickEpicUnit();
+      addUnit(epic,'에픽');
+      burst('에픽',epic);
+      showMessageModal('오늘은 식의 전화기가 조용합니다', `이번 라운드 몬스터 체력이 2배가 됩니다.\n${epic} 획득!`, afterPhone);
+    }
+  }
+
+  function showRpsModal(){
+    if(state.rpsDone) return;
+    state.messageOnClose = null;
+    $('messageCloseBtn').style.display = 'none';
+    $('messageTitle').textContent = '식과 가위바위보';
+    $('messageText').textContent = '가위, 바위, 보 중 하나를 고르세요.';
+    const actions=$('messageActions');
+    actions.innerHTML = ['가위','바위','보'].map(v=>`<button data-rps="${v}">${v}</button>`).join('');
+    actions.classList.add('show');
+    $('messageModal').style.display = 'flex';
+  }
+
+  function resolveRps(player){
+    if(state.rpsDone) return;
+    state.rpsDone = true;
+    const choices=['가위','바위','보'];
+    const sik=choices[Math.floor(Math.random()*choices.length)];
+    const win = (player==='가위'&&sik==='보') || (player==='바위'&&sik==='가위') || (player==='보'&&sik==='바위');
+    const lose = (sik==='가위'&&player==='보') || (sik==='바위'&&player==='가위') || (sik==='보'&&player==='바위');
+    $('messageActions').classList.remove('show');
+    $('messageActions').innerHTML = '';
+    if(win){
+      addUnit('박병호','에픽');
+      sfx('legend');
+      showMessageModal('가위바위보 승리!', `나: ${player} / 식: ${sik}\n박병호 획득!`);
+      _uiNext = 0;
+      updateUI();
+    }else if(lose){
+      state.units = state.units.filter(u=>u.race!=='박병호');
+      _powerVer++;
+      sfx('error');
+      showMessageModal('가위바위보 패배!', `나: ${player} / 식: ${sik}\n박병호가 삭제되었습니다.`);
+      _uiNext = 0;
+      updateUI();
+    }else{
+      sfx('menu');
+      showMessageModal('가위바위보 무승부', `나: ${player} / 식: ${sik}\n아무 일도 일어나지 않았습니다.`);
+    }
+  }
+
   function nextStage(){
     if(state.stage >= 100){ endGame(true,'최종보스 김박황연합까지 격파했다. 황제 세계 정복 성공.'); return; }
     const clearedStage = state.stage;
     state.stage++; state.time = bosses[state.stage] ? 120 : 45; state.spawned=0; state.nextSpawn=0;
     if(bosses[state.stage]) showBossAlert(bosses[state.stage]); else { sfx('wave'); toast(`WAVE ${state.stage}`); }
+    triggerStageEvents();
     if(clearedStage % 5 === 0) openAugmentChoice();
     updateUI();
   }
@@ -1738,7 +1813,11 @@
     $('toast').textContent=msg; $('toast').style.display='block';
     clearTimeout(toast._t); toast._t=setTimeout(()=>$('toast').style.display='none',700);
   }
-  function showMessageModal(title,text){
+  function showMessageModal(title,text,onClose){
+    state.messageOnClose = onClose || null;
+    $('messageActions').classList.remove('show');
+    $('messageActions').innerHTML = '';
+    $('messageCloseBtn').style.display = '';
     $('messageTitle').textContent = title;
     $('messageText').textContent = text || '';
     $('messageModal').style.display = 'flex';
@@ -2541,7 +2620,18 @@
   $('augListBtn').onclick = showAugmentList;
   $('augCloseBtn').onclick = ()=>$('augmentList').classList.remove('show');
   $('augmentCards').onclick = e=>{ const card=e.target.closest('[data-aug]'); if(card) chooseAugment(Number(card.dataset.aug)); };
-  $('messageCloseBtn').onclick = ()=>$('messageModal').style.display='none';
+  $('messageCloseBtn').onclick = ()=>{
+    $('messageModal').style.display='none';
+    $('messageActions').classList.remove('show');
+    $('messageActions').innerHTML = '';
+    const cb=state.messageOnClose;
+    state.messageOnClose=null;
+    if(cb) cb();
+  };
+  $('messageActions').onclick = e=>{
+    const choice=e.target.closest('[data-rps]')?.dataset.rps;
+    if(choice) resolveRps(choice);
+  };
   $('restartGameBtn').onclick = ()=>location.reload();
   $('statsRetryBtn').onclick = ()=>location.reload();
   $('statsCloseBtn').onclick = ()=>$('clearStats').style.display='none';
