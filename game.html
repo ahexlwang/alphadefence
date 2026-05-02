@@ -1010,8 +1010,8 @@
     return epicUnits[0];
   }
   function mythicRate(){
-    // 황제 기본 0.05%, 한 마리 뽑을 때마다 이후 확률 반토막.
-    return 0.0005 * Math.pow(0.5, state.mythicCount || 0);
+    // 황제 기본 0.005%, 한 마리 뽑을 때마다 이후 확률 반토막.
+    return 0.00005 * Math.pow(0.5, state.mythicCount || 0);
   }
   function rollRank(){
     const r = Math.random();
