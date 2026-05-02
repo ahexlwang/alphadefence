@@ -36,9 +36,11 @@
   .lowBtn{pointer-events:auto;min-height:36px;border:0;border-radius:999px;background:linear-gradient(180deg,#32d67c,#148245);border:2px solid rgba(255,255,255,.12);border-bottom:5px solid #075126;color:white;font-weight:1000;font-size:11px;letter-spacing:-.4px;box-shadow:var(--shadow)}
   .lowBtn.high{background:linear-gradient(180deg,#ff9a47,#b95318);border-bottom-color:#6e2a0c}
   .augBtn:active,.lowBtn:active{transform:translateY(2px);border-bottom-width:3px}
-  .sikHelpBtn{position:absolute;right:10px;top:calc(env(safe-area-inset-top,0px) + 98px);z-index:21;pointer-events:auto;min-width:112px;min-height:42px;border:0;border-radius:15px;background:linear-gradient(180deg,#79e8ff,#268bd8);border:2px solid rgba(255,255,255,.35);border-bottom:6px solid #075188;color:#052033;font-size:14px;font-weight:1000;box-shadow:var(--shadow);text-shadow:0 1px rgba(255,255,255,.45)}
-  .sikHelpBtn:active{transform:translateY(2px);border-bottom-width:4px}
-  .sikHelpBtn:disabled{filter:grayscale(.8);opacity:.62}
+  .sideActionBtn{position:absolute;right:10px;z-index:21;pointer-events:auto;min-width:112px;min-height:42px;border:0;border-radius:15px;border:2px solid rgba(255,255,255,.35);border-bottom-width:6px;font-size:14px;font-weight:1000;box-shadow:var(--shadow);text-shadow:0 1px rgba(255,255,255,.45);line-height:1.05}
+  .sideActionBtn:active{transform:translateY(2px);border-bottom-width:4px}
+  .sideActionBtn:disabled{filter:grayscale(.8);opacity:.62}
+  .sikHelpBtn{top:calc(env(safe-area-inset-top,0px) + 140px);background:linear-gradient(180deg,#79e8ff,#268bd8);border-bottom-color:#075188;color:#052033}
+  .naksBtn{top:calc(env(safe-area-inset-top,0px) + 190px);width:134px;background:linear-gradient(180deg,#ffe37a,#d89324);border-bottom-color:#8f5714;color:#251500;font-size:12px}
   .augOverlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:30;padding:18px;pointer-events:auto;background:rgba(0,0,0,.58)}
   .augOverlay.show{display:flex}
   .augBox{width:100%;max-height:86%;overflow:auto;border-radius:24px;background:linear-gradient(180deg,#2b2f3a,#141820);border:3px solid rgba(255,255,255,.12);border-bottom:8px solid #07090d;box-shadow:0 22px 60px rgba(0,0,0,.55);padding:16px}
@@ -130,7 +132,7 @@
   .menu-sell{background:linear-gradient(180deg,#d76d7b,#8f2b3f)}
   .menu-back{background:linear-gradient(180deg,#5b5b5b,#2e2e2e)}
 
-  #titleScreen,#gameOver{position:absolute;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(180deg,rgba(10,20,12,.72),rgba(0,0,0,.55))}
+  #titleScreen,#gameOver,#messageModal{position:absolute;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(180deg,rgba(10,20,12,.72),rgba(0,0,0,.55))}
   #titleScreen{z-index:80;pointer-events:auto;padding:0;background:#060c0a}
   .titleBg{position:absolute;inset:0;width:100%;height:100%}
   .titleNameBlock{position:absolute;top:calc(env(safe-area-inset-top,0px) + 42px);left:50%;transform:translateX(-50%);text-align:center;pointer-events:none;z-index:5;width:min(92%,440px)}
@@ -139,14 +141,17 @@
   #titleScreen .titleHero{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
   #titleScreen .titleOverlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.03) 0%,rgba(0,0,0,.03) 45%,rgba(0,0,0,.12) 100%)}
   #titleScreen .titleStartWrap{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 72px);transform:translateX(-50%);width:min(78%,420px);display:flex;justify-content:center}
-  .modal{width:100%;padding:24px 18px;border-radius:28px;background:linear-gradient(180deg,#23313b,#0f1722);border:4px solid #5b6976;border-bottom:10px solid #020503;box-shadow:0 18px 50px rgba(0,0,0,.55);text-align:center}
+  .modal{position:relative;width:100%;padding:24px 18px;border-radius:28px;background:linear-gradient(180deg,#23313b,#0f1722);border:4px solid #5b6976;border-bottom:10px solid #020503;box-shadow:0 18px 50px rgba(0,0,0,.55);text-align:center}
   .title{font-size:30px;font-weight:1000;line-height:1.04;letter-spacing:-1.5px;color:#ffe76a;text-shadow:0 4px #3b2b08}
   .titleSub{margin-top:8px;font-size:14px;color:#e4efd8;font-weight:700;line-height:1.45}
   .startBtn{margin-top:16px;width:100%;height:76px;border:0;border-radius:24px;background:linear-gradient(180deg,#ffe97c,#ffc12d 58%,#f0a611);border-bottom:10px solid #8a5307;font-size:28px;font-weight:1000;color:#2a1a00;box-shadow:0 14px 26px rgba(0,0,0,.34), inset 0 2px 0 rgba(255,255,255,.40)}
   .startBtn:active{transform:translateY(3px);border-bottom-width:6px}
   .startBtn.locked{filter:grayscale(.35) brightness(.82);background:linear-gradient(180deg,#9aa0aa,#5b626e);border-bottom-color:#252b34;color:#fff;box-shadow:0 10px 18px rgba(0,0,0,.28)}
   .startBtn.locked:active{transform:none;border-bottom-width:10px}
-  #gameOver{display:none}
+  #gameOver,#messageModal{display:none}
+  #messageModal{z-index:70;pointer-events:auto}
+  .messageClose{position:absolute;right:14px;top:12px;width:42px;height:42px;border:0;border-radius:14px;background:linear-gradient(180deg,#ff6b6b,#b52533);border-bottom:6px solid #6b0f19;color:white;font-size:24px;font-weight:1000;line-height:1;box-shadow:0 8px 18px rgba(0,0,0,.28)}
+  .messageClose:active{transform:translateY(2px);border-bottom-width:4px}
   #clearStats{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:42;padding:14px;background:rgba(5,8,10,.72);backdrop-filter:blur(5px)}
   .statsPanel{width:min(96%,520px);max-height:94%;overflow:auto;border-radius:28px;background:linear-gradient(180deg,#222b36,#10151d);border:3px solid rgba(255,255,255,.12);border-bottom:9px solid #05070a;box-shadow:0 22px 60px rgba(0,0,0,.62);padding:16px;color:#f6f4e8}
   .statsHead{text-align:center;margin-bottom:10px}
@@ -239,7 +244,8 @@
         <button class="lowBtn high" id="lowModeBtn">고사양</button>
       </div>
     </div>
-    <button class="sikHelpBtn" id="sikHelpBtn">식 도와줘 2/2</button>
+    <button class="sideActionBtn sikHelpBtn" id="sikHelpBtn">식 도와줘 2/2</button>
+    <button class="sideActionBtn naksBtn" id="naksBtn">낙성대 우동에서<br>진대하기 2/2</button>
 
     <div class="warn" id="warn">⚠ 60마리 이상! 몬스터 폭주 경보!</div>
     <div id="toast"></div>
@@ -431,6 +437,14 @@
     </div>
   </div>
 
+  <div id="messageModal">
+    <div class="modal">
+      <button class="messageClose" id="messageCloseBtn">×</button>
+      <div class="title" id="messageTitle">알림</div>
+      <div class="titleSub" id="messageText"></div>
+    </div>
+  </div>
+
   <div id="clearStats">
     <div class="statsPanel">
       <div class="statsHead">
@@ -490,6 +504,8 @@
     mythicCount:0,
     sikHelpUses:0,
     sikFlood:null,
+    naksUses:0,
+    nakseongBuffTimer:0,
     choosingAugment:false,
     augmentChoices:[],
     augPickCounts:{},
@@ -560,6 +576,9 @@
 
   function drawCost(){
     return Math.max(5, balance.drawCost - state.aug.drawDiscount);
+  }
+  function nakseongDmgMul(){
+    return state.nakseongBuffTimer > 0 ? 2 : 1;
   }
   function killGoldReward(){
     return Math.max(1, Math.round(balance.rewardPer10Kills * (1 + state.aug.goldBonus)));
@@ -907,15 +926,22 @@
     const type = boss ? 'L' : (stage % 3 === 1 ? 'S' : stage % 3 === 2 ? 'M' : 'L');
 
     // 스테이지별 체력은 기획표 기준 고정값을 사용한다.
-    // 7스테이지 272 유지, 13스테이지 800 수준으로 조정된 곡선.
+    // 30스테이지 이후에는 클리어 가능한 선에서 체력/속도/방어를 조금씩 올린다.
     let hp = STAGE_HP[stage] || STAGE_HP[100] || 1000;
 
     let armor = stage < 5 ? 0 : 1 + Math.floor((stage-5)/4);
     let speed = 0.030 + Math.min(0.020, stage*0.00040);
     if(stage <= 2) speed *= 0.94;
+    if(stage > 30){
+      const late = stage - 30;
+      hp = Math.ceil(hp * (1 + Math.min(0.38, late * 0.0055)));
+      speed *= (1 + Math.min(0.11, late * 0.0016));
+      armor += Math.floor(late / 18);
+    }
     if(boss){
       const bossLv = Math.max(1, Math.floor(stage/10));
       armor = Math.max(0, Math.floor((bossLv-1)*1.75));
+      if(stage > 30) armor += Math.floor((stage-30)/24);
       speed *= .50;
     }
     return {hp,maxHp:hp,armor,speed,type,boss};
@@ -959,8 +985,8 @@
   }
 
   function epicRate(){
-    // 아직 최초 획득하지 못한 에픽이 있으면 에픽 확률 5%, 전부 한 번씩 보면 2%.
-    return epicUnits.some(e=>!state.epicSeen[e]) ? 0.05 : 0.02;
+    // 아직 최초 획득하지 못한 에픽이 있으면 에픽 확률 3%, 전부 한 번씩 보면 2%.
+    return epicUnits.some(e=>!state.epicSeen[e]) ? 0.03 : 0.02;
   }
   function pickEpicUnit(){
     // 최초 획득 전 에픽은 가중치 2, 이미 얻은 에픽은 가중치 1.
@@ -1001,7 +1027,7 @@
         balance.unitBase.nick.dmg * (1 + state.up.nick * upgradeMul) +
         balance.unitBase.dick.dmg * (1 + state.up.dick * upgradeMul);
       pw = {
-        dmg:sumDmg * (1 + state.aug.globalDmg),
+        dmg:sumDmg * (1 + state.aug.globalDmg) * nakseongDmgMul(),
         rate:b.rate * (1 + state.aug.globalRate) * (1 + state.aug.epicRate*.5),
         range:Math.max(W,H) * 1.15,
         move:b.move,
@@ -1020,7 +1046,7 @@
       const idx=ranks.indexOf(u.rank);
       const up = (u.race==='신화'||u.rank==='에픽') ? 0 : state.up[u.race]||0;
       pw = {
-        dmg:b.dmg * balance.rankDamageMul[u.rank] * (1 + up * (0.408 + state.aug.upgradeBoost)) * (1 + state.aug.globalDmg) * (state.bacteriaTimer>0 ? 1.35 : 1),
+        dmg:b.dmg * balance.rankDamageMul[u.rank] * (1 + up * (0.408 + state.aug.upgradeBoost)) * (1 + state.aug.globalDmg) * (state.bacteriaTimer>0 ? 1.35 : 1) * nakseongDmgMul(),
         rate:b.rate * balance.rankRateMul[u.rank] * (1 + state.aug.globalRate) * (u.rank==='에픽' ? (1 + state.aug.epicRate) : 1),
         range:Math.min(W,H) * (b.range + balance.rankRangeAdd[u.rank]) * (1 + state.aug.globalRange),
         move:b.move + idx*1.5,
@@ -1066,7 +1092,7 @@
     $('burst').style.display = 'none';
     _powerVer++;
     sfx('error');
-    toast('식이 도망갔습니다');
+    showMessageModal('식이 도망갔습니다', 'sick 일반 유닛이 20개를 넘어 전부 도망갔습니다.');
     _uiNext = 0;
     updateUI();
     return true;
@@ -1293,7 +1319,7 @@
       const swingR = W * 0.17 * (1 + state.aug.bbhRange) * (1 + state.aug.epicRange);
       for(const m of state.mobs){
         if(Math.hypot(m.x-u.x,m.y-u.y) <= swingR){
-          const dmg = 60 * (1 + state.aug.globalDmg) * (m.boss ? (1+state.aug.bossDmg) : 1);
+          const dmg = 60 * (1 + state.aug.globalDmg) * nakseongDmgMul() * (m.boss ? (1+state.aug.bossDmg) : 1);
           m.hp -= dmg; m.flash = .18;
           applyBbhKnockback(m, 0.03 + state.aug.bbhKnockback * 0.03);
         }
@@ -1485,7 +1511,7 @@
         m.poison-=dt;
         m.poisonTick=(m.poisonTick||0.5)-dt;
         if(m.poisonTick<=0){
-          m.hp -= Math.max(1, m.maxHp * (m.poisonPct||0.018)) * (1+state.aug.globalDmg);
+          m.hp -= Math.max(1, m.maxHp * (m.poisonPct||0.018)) * (1+state.aug.globalDmg) * nakseongDmgMul();
           m.flash=.09;
           m.poisonTick=0.5;
         }
@@ -1525,6 +1551,27 @@
     updateSikHelpButton();
   }
 
+  function useNakseongTalk(){
+    if(state.naksUses >= 2){ toast('진대하기는 2번까지!'); sfx('error'); return; }
+    state.naksUses++;
+    updateNaksButton();
+    if(Math.random() < .90){
+      state.nakseongBuffTimer = Math.max(state.nakseongBuffTimer, 30);
+      _powerVer++;
+      sfx('legend');
+      showMessageModal('식이 같이 갑니다.', '전체 유닛 데미지가 30초 동안 2배가 됩니다.');
+    }else{
+      state.units = state.units.filter(u=>u.race!=='sick');
+      state.dragging = null;
+      $('menu').innerHTML = '';
+      _powerVer++;
+      sfx('error');
+      showMessageModal('식이 도망갔습니다', 'sick 유닛이 전부 삭제되었습니다.');
+      _uiNext = 0;
+      updateUI();
+    }
+  }
+
   function nextStage(){
     if(state.stage >= 100){ endGame(true,'최종보스 김박황연합까지 격파했다. 황제 세계 정복 성공.'); return; }
     const clearedStage = state.stage;
@@ -1561,6 +1608,11 @@
 
     if(state.bacteriaTimer>0){ const wasActive=state.bacteriaTimer>0; state.bacteriaTimer-=dt; if(wasActive && state.bacteriaTimer<=0) _powerVer++; }
     if(state.bacteriaCoolTimer>0) state.bacteriaCoolTimer-=dt;
+    if(state.nakseongBuffTimer>0){
+      const wasActive=state.nakseongBuffTimer>0;
+      state.nakseongBuffTimer-=dt;
+      if(wasActive && state.nakseongBuffTimer<=0){ state.nakseongBuffTimer=0; _powerVer++; }
+    }
     updateMobs(dt); updateUnits(dt); updateShots(dt); updateFx(dt);
 
     const dead = state.mobs.filter(m=>m.hp<=0);
@@ -1686,6 +1738,11 @@
     $('toast').textContent=msg; $('toast').style.display='block';
     clearTimeout(toast._t); toast._t=setTimeout(()=>$('toast').style.display='none',700);
   }
+  function showMessageModal(title,text){
+    $('messageTitle').textContent = title;
+    $('messageText').textContent = text || '';
+    $('messageModal').style.display = 'flex';
+  }
   function showGoldPopup(msg){
     sfx('gold');
     const el=$('goldPopup');
@@ -1702,11 +1759,7 @@
     for(let i=0;i<3;i++) state.fx.push({kind:'splash',x:W*.5,y:H*.42,r:W*(0.12+i*0.1),life:.7+i*.15,color:'#ffb300'});
     $('app').classList.add('quake');
     setTimeout(()=>{ $('app').classList.remove('quake'); $('app').classList.add('quake'); setTimeout(()=>$('app').classList.remove('quake'),400); }, 320);
-    $('burstRank').textContent = '황제 등극!!!';
-    $('burstName').textContent = '황제';
-    $('burstDesc').textContent = '세 종족 합산 공격 · 에픽 3종 능력 보유';
-    $('burst').style.display='flex';
-    setTimeout(()=>{ $('burst').style.display='none'; }, 1800);
+    showMessageModal('황제 등극!!!', '세 종족 합산 공격 · 에픽 3종 능력 보유');
   }
 
   function burst(rank,race){
@@ -1736,7 +1789,7 @@
     {id:'atk',title:'식과 함께',stat:'globalDmg',cap:.60,tiers:{common:{v:.05,txt:'전체 유닛 공격력 +5%'},advanced:{v:.08,txt:'전체 유닛 공격력 +8%'},rare:{v:.12,txt:'전체 유닛 공격력 +12%'}}},
     {id:'rate',title:'알파 회원 가입',stat:'globalRate',cap:.60,tiers:{common:{v:.05,txt:'전체 유닛 공격속도 +5%'},advanced:{v:.08,txt:'전체 유닛 공격속도 +8%'},rare:{v:.12,txt:'전체 유닛 공격속도 +12%'}}},
     {id:'range',title:'식이 어디갔지',stat:'globalRange',cap:.45,tiers:{common:{v:.05,txt:'전체 유닛 사거리 +5%'},advanced:{v:.08,txt:'전체 유닛 사거리 +8%'},rare:{v:.12,txt:'전체 유닛 사거리 +12%'}}},
-    {id:'discount',title:'골든벨 울리기',stat:'drawDiscount',cap:5,tiers:{common:{v:1,txt:'유닛뽑기 가격 1G 인하'},advanced:{v:2,txt:'유닛뽑기 가격 2G 인하'},rare:{v:3,txt:'유닛뽑기 가격 3G 인하'}}},
+    {id:'discount',title:'골든벨 울리기',stat:'drawDiscount',cap:5,maxPicks:2,maxOffers:2,tiers:{common:{v:1,txt:'유닛뽑기 가격 1G 인하'},advanced:{v:2,txt:'유닛뽑기 가격 2G 인하'},rare:{v:3,txt:'유닛뽑기 가격 3G 인하'}}},
     {id:'gold',title:'식쾌환',stat:'goldBonus',cap:.90,tiers:{common:{v:.10,txt:'10킬 보상 골드 +10%'},advanced:{v:.16,txt:'10킬 보상 골드 +16%'},rare:{v:.25,txt:'10킬 보상 골드 +25%'}}},
     {id:'sell',title:'식스퍼거',stat:'sellBonus',cap:1.20,maxPicks:2,maxOffers:2,tiers:{common:{v:.20,txt:'유닛 판매 가격 +20%'},advanced:{v:.35,txt:'유닛 판매 가격 +35%'},rare:{v:.50,txt:'유닛 판매 가격 +50%'}}},
     {id:'upcost',title:'식대 정산',stat:'upgradeDiscount',cap:.40,tiers:{common:{v:.10,txt:'공격력 강화 비용 10% 인하'},advanced:{v:.16,txt:'공격력 강화 비용 16% 인하'},rare:{v:.25,txt:'공격력 강화 비용 25% 인하'}}},
@@ -1950,6 +2003,7 @@
     $('upJP').textContent = `+${Math.round(state.up.dick*(40.8+state.aug.upgradeBoost*100))}%`;
     updateRaceCounts();
     updateSikHelpButton();
+    updateNaksButton();
     $('warn').classList.toggle('show', state.mobs.length >= 60);
   }
 
@@ -1958,6 +2012,13 @@
     if(!btn) return;
     const left=Math.max(0, 2 - state.sikHelpUses);
     btn.textContent=`식 도와줘 ${left}/2`;
+    btn.disabled = left <= 0;
+  }
+  function updateNaksButton(){
+    const btn=$('naksBtn');
+    if(!btn) return;
+    const left=Math.max(0, 2 - state.naksUses);
+    btn.innerHTML=`낙성대 우동에서<br>진대하기 ${left}/2`;
     btn.disabled = left <= 0;
   }
 
@@ -2455,6 +2516,7 @@
   bindButtonAction('autoMergeBtn', autoMergeAll);
   bindButtonAction('epicRerollBtn', ()=>{ sfx('menu'); openEpicRerollMenu(); });
   bindButtonAction('sikHelpBtn', useSikHelp);
+  bindButtonAction('naksBtn', useNakseongTalk);
   $('retryBtn').onclick = ()=>location.reload();
   function setLowMode(on){
     state.lowMode = !!on;
@@ -2479,6 +2541,7 @@
   $('augListBtn').onclick = showAugmentList;
   $('augCloseBtn').onclick = ()=>$('augmentList').classList.remove('show');
   $('augmentCards').onclick = e=>{ const card=e.target.closest('[data-aug]'); if(card) chooseAugment(Number(card.dataset.aug)); };
+  $('messageCloseBtn').onclick = ()=>$('messageModal').style.display='none';
   $('restartGameBtn').onclick = ()=>location.reload();
   $('statsRetryBtn').onclick = ()=>location.reload();
   $('statsCloseBtn').onclick = ()=>$('clearStats').style.display='none';
