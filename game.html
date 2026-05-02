@@ -2064,6 +2064,11 @@
   }
 
   function fmtTime(t){ t=Math.max(0,Math.ceil(t)); return `${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`; }
+  function attackBonusPct(race){
+    const upgradeMul = 0.408 + state.aug.upgradeBoost;
+    const totalMul = (1 + (state.up[race]||0) * upgradeMul) * (1 + state.aug.globalDmg) * nakseongDmgMul();
+    return Math.max(0, Math.round((totalMul - 1) * 100));
+  }
   function updateRaceCounts(){
     const cnt={};
     for(const u of state.units){ const k=u.race+'|'+u.rank; cnt[k]=(cnt[k]||0)+1; }
@@ -2089,9 +2094,9 @@
     $('upM').textContent = `Lv.${state.up.sick}`;
     $('upC').textContent = `Lv.${state.up.nick}`;
     $('upJ').textContent = `Lv.${state.up.dick}`;
-    $('upMP').textContent = `+${Math.round(state.up.sick*(40.8+state.aug.upgradeBoost*100))}%`;
-    $('upCP').textContent = `+${Math.round(state.up.nick*(40.8+state.aug.upgradeBoost*100))}%`;
-    $('upJP').textContent = `+${Math.round(state.up.dick*(40.8+state.aug.upgradeBoost*100))}%`;
+    $('upMP').textContent = `+${attackBonusPct('sick')}%`;
+    $('upCP').textContent = `+${attackBonusPct('nick')}%`;
+    $('upJP').textContent = `+${attackBonusPct('dick')}%`;
     updateRaceCounts();
     updateSikHelpButton();
     updateNaksButton();
