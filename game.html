@@ -989,8 +989,8 @@
     return epicUnits.some(e=>!state.epicSeen[e]) ? 0.03 : 0.02;
   }
   function pickEpicUnit(){
-    // 최초 획득 전 에픽은 가중치 2, 이미 얻은 에픽은 가중치 1.
-    const weights=epicUnits.map(e=>state.epicSeen[e]?1:2);
+    // 최초 획득 전 에픽은 가중치 2, 이미 얻은 에픽은 가중치 0.5.
+    const weights=epicUnits.map(e=>state.epicSeen[e]?0.5:2);
     let total=weights.reduce((a,b)=>a+b,0);
     let r=Math.random()*total;
     for(let i=0;i<epicUnits.length;i++){
