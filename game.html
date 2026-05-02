@@ -936,22 +936,25 @@
     const type = boss ? 'L' : (stage % 3 === 1 ? 'S' : stage % 3 === 2 ? 'M' : 'L');
 
     // 스테이지별 체력은 기획표 기준 고정값을 사용한다.
-    // 30스테이지 이후에는 클리어 가능한 선에서 체력/속도/방어를 조금씩 올린다.
+    // 30스테이지 이후에는 계단식 체력 배율과 소량의 방어 보정으로 후반 난이도를 올린다.
     let hp = STAGE_HP[stage] || STAGE_HP[100] || 1000;
 
     let armor = stage < 5 ? 0 : 1 + Math.floor((stage-5)/4);
     let speed = 0.030 + Math.min(0.020, stage*0.00040);
     if(stage <= 2) speed *= 0.94;
-    if(stage > 30){
-      const late = stage - 30;
-      hp = Math.ceil(hp * (1 + Math.min(0.38, late * 0.0055)));
-      speed *= (1 + Math.min(0.11, late * 0.0016));
-      armor += Math.floor(late / 18);
+    if(stage >= 30){
+      const hpMul = stage >= 60 ? 4 : stage >= 50 ? 3 : stage >= 40 ? 2 : 1.5;
+      const armorAdd = stage >= 60 ? 3 : stage >= 50 ? 2 : stage >= 40 ? 1 : 0;
+      hp = Math.ceil(hp * hpMul);
+      armor += armorAdd;
+      speed *= (1 + Math.min(0.11, (stage-30) * 0.0016));
     }
     if(boss){
       const bossLv = Math.max(1, Math.floor(stage/10));
       armor = Math.max(0, Math.floor((bossLv-1)*1.75));
-      if(stage > 30) armor += Math.floor((stage-30)/24);
+      if(stage >= 30){
+        armor += stage >= 60 ? 3 : stage >= 50 ? 2 : stage >= 40 ? 1 : 0;
+      }
       speed *= .50;
     }
     if(stage === state.stage) hp = Math.ceil(hp * (state.stageHpMul || 1));
